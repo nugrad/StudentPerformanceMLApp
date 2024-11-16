@@ -1,21 +1,32 @@
+import os
 from flask import Flask, request, render_template
 import pandas as pd
 import pickle
 from sklearn.metrics import mean_squared_error, r2_score
 import numpy as np
 
-app = Flask(__name__)
+# Define the base directory
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Create absolute paths for files
+MODEL_PATH = os.path.join(BASE_DIR, "model", "model.pkl")
+PREPROCESSOR_PATH = os.path.join(BASE_DIR, "model", "preprocessor.pkl")
+X_TEST_PATH = os.path.join(BASE_DIR, "data", "X_test_transformed.csv")
+Y_TEST_PATH = os.path.join(BASE_DIR, "data", "y_test.csv")
+
+# Initialize the Flask app
+app = Flask(__name__, static_folder="static", template_folder="templates")
 
 # Load pre-trained model and preprocessor
-with open("model/model.pkl", "rb") as f:
+with open(MODEL_PATH, "rb") as f:
     model = pickle.load(f)
 
-with open("model/preprocessor.pkl", "rb") as f:
+with open(PREPROCESSOR_PATH, "rb") as f:
     preprocessor = pickle.load(f)
 
 # Load transformed X_test and y_test for calculating metrics from CSV files
-X_test = pd.read_csv("data/X_test_transformed.csv")
-y_test = pd.read_csv("data/y_test.csv")["math score"]
+X_test = pd.read_csv(X_TEST_PATH)
+y_test = pd.read_csv(Y_TEST_PATH)["math score"]
 
 # Make predictions on X_test to calculate metrics
 y_pred = model.predict(X_test)
